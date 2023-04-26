@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "PCL_Functions.h"
 
 namespace pcl_func {
@@ -28,23 +27,19 @@ namespace pcl_func {
 		visualizer.updateVisualizer(calcPoints);
 		
 		//-----------------------------------
-		//ƒNƒ‰ƒXƒ^•ªŠ„
+		//
 		//-----------------------------------
-		//ƒ|ƒCƒ“ƒgƒNƒ‰ƒEƒh‚ğƒNƒ‰ƒXƒ^‚É•ªŠ„
 		//voxelGridFilter(0.1f, calcPoints);
 		euclideanClusterExtraction(calcPoints, eachClouds);
 		calcPoints.reset();
 
-		//dSŒvZ
 		centroids.clear();
 		for (int i = 0; i < eachClouds.size(); i++)
 		{
-			//ƒNƒ‰ƒXƒ^‚ÌdS‚ğŒvZ
 			Eigen::Vector4f center = centroid(eachClouds[i]);
 			centroids.push_back(center);
 		}
 
-		//•ªŠ„‚³‚ê‚½ƒNƒ‰ƒXƒ^‚ÉF‚ğ•t‚¯‚Ä•\¦
 		pcl::PointCloud<pcl::PointXYZRGB>::Ptr clusteredColorCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
 		vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> coloredClouds;
 
@@ -108,7 +103,6 @@ namespace pcl_func {
 	}
 
 	void PCL_Functions::createPolygon(vector<pcl::PointCloud<PointType>::Ptr> &clouds) {
-		//ŠeƒLƒlƒNƒg‚ÌƒfƒvƒX‚É‘Î‚µ‚Äƒ|ƒŠƒSƒ“¶¬
 		polygonMeshs.clear();
 		for (int i = 0; i < clouds.size(); i++)
 		{
@@ -127,15 +121,13 @@ namespace pcl_func {
 		float pitchRad = pitch / 180.0 * M_PI;
 		float yawRad = yaw / 180.0 * M_PI;
 		float rollRad = roll / 180.0 * M_PI;
-		//‰ñ“]
+
 		transform.rotate(Eigen::AngleAxisf(pitchRad, Eigen::Vector3f::UnitX()));
 		transform.rotate(Eigen::AngleAxisf(yawRad, Eigen::Vector3f::UnitY()));
 		transform.rotate(Eigen::AngleAxisf(rollRad, Eigen::Vector3f::UnitZ()));
 
-		//ˆÚ“®
 		transform.translation() << x, y, z;
 
-		//Às
 		pcl::PointCloud<PointType>::Ptr p(new pcl::PointCloud<PointType>());
 		pcl::transformPointCloud(*cloud, *p, transform);
 		*cloud = *p;
@@ -164,17 +156,14 @@ namespace pcl_func {
 		transformRotateZ.rotate(Eigen::AngleAxisf(rollRad, Eigen::Vector3f::UnitZ()));
 		pcl::transformPointCloud(*outputCloud, *outputCloud, transformRotateZ);
 
-		//ˆÚ“®
 		Eigen::Affine3f transformMove = Eigen::Affine3f::Identity();
 		transformMove.translation() << posture.getX(), posture.getY(), posture.getZ();
 		pcl::transformPointCloud(*outputCloud, *outputCloud, transformMove);
 	}
 
 	void PCL_Functions::edgeRmoveFilter(pcl::PointCloud<PointType>::Ptr cloud) {
-		//–@ü
 		pcl::PointCloud<PointNormalType>::Ptr normal = createNormals(cloud);
 
-		//–@ü‚ÌŒX‚«‚ªˆê’èˆÈã‚¾‚Á‚½‚çƒXƒ‹[
 		vector<int> removeIndex;
 		for (int i = 0; i < cloud->points.size(); i++)
 		{
@@ -195,8 +184,8 @@ namespace pcl_func {
 	{
 		pcl::StatisticalOutlierRemoval<PointType> sor;
 		sor.setInputCloud(cloud);
-		sor.setMeanK(10);				//‹ßÚ‰½ƒ|ƒCƒ“ƒg‚ğg‚¤‚©
-		sor.setStddevMulThresh(1.0);	//‚±‚Ì•W€•Î·ˆÈã‚ğƒtƒBƒ‹ƒ^[‚µ‚ÄØ‚é
+		sor.setMeanK(10);
+		sor.setStddevMulThresh(1.0);
 
 		pcl::PointCloud<PointType>::Ptr cloud_filtered(new pcl::PointCloud<PointType>);
 		sor.filter(*cloud_filtered);
@@ -209,7 +198,7 @@ namespace pcl_func {
 	{
 		//VoxelGrid
 		pcl::VoxelGrid<PointType> grid;
-		grid.setLeafSize(leaf, leaf, leaf);		//ƒtƒBƒ‹ƒ^[”ÍˆÍİ’è
+		grid.setLeafSize(leaf, leaf, leaf);
 		grid.setInputCloud(cloud);
 		pcl::PointCloud<PointType>::Ptr cloud_filtered(new pcl::PointCloud<PointType>());
 		grid.filter(*cloud_filtered);
@@ -261,7 +250,7 @@ namespace pcl_func {
 	{
 		pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
 		pcl::PointIndices::Ptr inliners(new pcl::PointIndices);
-
+		
 		pcl::SACSegmentation<PointType> seg;
 		seg.setOptimizeCoefficients(true);
 		seg.setModelType(pcl::SACMODEL_PLANE);
@@ -278,9 +267,9 @@ namespace pcl_func {
 	{
 		// Normal estimation
 		// Normal estimation*
-		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
+		pcl::NormalEstimation<PointType, pcl::Normal> n;
 		pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+		pcl::search::KdTree<PointType>::Ptr tree(new pcl::search::KdTree<PointType>);
 		tree->setInputCloud(cloud);
 		n.setInputCloud(cloud);
 		n.setSearchMethod(tree);
@@ -295,20 +284,16 @@ namespace pcl_func {
 
 	pcl::PointCloud<PointNormalType>::Ptr PCL_Functions::createNormals(pcl::PointCloud<PointType>::Ptr cloud)
 	{
-		//–@ü‚Ìæ“¾
-		//–@üŠi”[—p‚ÌƒXƒ}[ƒgƒ|ƒCƒ“ƒ^‚ğ—pˆÓ
 		pcl::PointCloud<PointNormalType>::Ptr cloud_with_normals(new pcl::PointCloud<PointNormalType>);
-		//ƒXƒ€[ƒWƒ“ƒO—p‚Ìƒ‚ƒWƒ…[ƒ‹‚ğ—pˆÓ
 		pcl::MovingLeastSquares<PointType, PointNormalType> mls;
-		//kdTreeƒ‚ƒWƒ…[ƒ‹
 		pcl::search::KdTree<PointType>::Ptr tree(new pcl::search::KdTree<PointType>);
 
-		mls.setComputeNormals(true);	//–@ü‚ÌŒvZ‚ğs‚¤‚©‚Ç‚¤‚©
-		mls.setInputCloud(cloud);		//“ü—Í‚Ìƒ|ƒCƒ“ƒgƒNƒ‰ƒEƒh
-		mls.setPolynomialFit(true);		//‘½€®ƒtƒBƒbƒeƒBƒ“ƒO‚â‚é‚©‚Ç‚¤‚©BƒIƒt‚É‚·‚é‚Æ‘¬‚­‚Í‚È‚éB
-		mls.setSearchMethod(tree);		//’Tõƒƒ\ƒbƒh‚Ìİ’è
-		mls.setSearchRadius(0.06);		//•½ŠŠ‰»‚Ì‹ï‡i0.03ˆÊ‚ª‘Å“|H0.06‚Å‚¾‚¢‚Ô•½‚ç‚É‚È‚éjhttp://www.cc.kyoto-su.ac.jp/~kano/pdf/study/student/2013YamamotoPresen.pdf
-										//ŒvZ
+		mls.setComputeNormals(true);	//
+		mls.setInputCloud(cloud);		//
+		//mls.setPolynomialFit(true);		//
+		mls.setSearchMethod(tree);		//
+		mls.setSearchRadius(0.06);		//http://www.cc.kyoto-su.ac.jp/~kano/pdf/study/student/2013YamamotoPresen.pdf
+										
 
 		mls.process(*cloud_with_normals);
 
@@ -317,7 +302,6 @@ namespace pcl_func {
 
 	pcl::PolygonMesh PCL_Functions::createMeshWithOFM(pcl::PointCloud<PointType>::Ptr cloud)
 	{
-		//RangeImage‚Éˆê“x•ÏŠ·‚·‚é
 		float angularResolution = (float)(0.1f * (M_PI / 180.0f));  //   1.0 degree in radians
 		float maxAngleWidth = (float)(120.0f * (M_PI / 180.0f));  // 360.0 degree in radians
 		float maxAngleHeight = (float)(60.0f * (M_PI / 180.0f));  // 180.0 degree in radians
@@ -332,7 +316,6 @@ namespace pcl_func {
 			sensorPose, coordinate_frame, noiseLevel, minRange, borderSize);
 		//std::cout << rangeImage << std::endl;
 
-		//RangeImage‚©‚çÄ“xPointCloud‚ÉOrganized Point Cloud‚Æ‚µ‚Ä•ÏŠ·
 		pcl::PointCloud<PointType>::Ptr rangedCloud(new pcl::PointCloud<PointType>());
 		rangedCloud->width = rangeImage.width;
 		rangedCloud->height = rangeImage.height;
@@ -342,7 +325,6 @@ namespace pcl_func {
 			pcl::copyPoint(rangeImage.points[i], rangedCloud->points[i]);
 		}
 
-		//ƒƒbƒVƒ…‰»
 		pcl::OrganizedFastMesh<PointType> ofm;
 		ofm.setTrianglePixelSize(2);
 
@@ -354,50 +336,49 @@ namespace pcl_func {
 		return mesh;
 	}
 
-	pcl::PolygonMesh PCL_Functions::createMeshWithGP3(pcl::PointCloud<PointType>::Ptr cloud)
-	{
-		// Normal estimation*
-		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
-		pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
-		tree->setInputCloud(cloud);
-		n.setInputCloud(cloud);
-		n.setSearchMethod(tree);
-		n.setKSearch(20);
-		n.compute(*normals);
-		//* normals should not contain the point normals + surface curvatures
+	//pcl::PolygonMesh PCL_Functions::createMeshWithGP3(pcl::PointCloud<PointType>::Ptr cloud)
+	//{
+	//	// Normal estimation*
+	//	pcl::NormalEstimation<PointType, pcl::Normal> n;
+	//	pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+	//	pcl::search::KdTree<PointType>::Ptr tree(new pcl::search::KdTree<PointType>);
+	//	tree->setInputCloud(cloud);
+	//	n.setInputCloud(cloud);
+	//	n.setSearchMethod(tree);
+	//	n.setKSearch(20);
+	//	n.compute(*normals);
+	//	//* normals should not contain the point normals + surface curvatures
 
-		// Concatenate the XYZ and normal fields*
-		pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
-		pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);
-		//* cloud_with_normals = cloud + normals
+	//	// Concatenate the XYZ and normal fields*
+	//	pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
+	//	pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);
+	//	//* cloud_with_normals = cloud + normals
 
-		// Create search tree*
-		pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(new pcl::search::KdTree<pcl::PointNormal>);
-		tree2->setInputCloud(cloud_with_normals);
+	//	// Create search tree*
+	//	pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(new pcl::search::KdTree<pcl::PointNormal>);
+	//	tree2->setInputCloud(cloud_with_normals);
 
-		//ƒƒbƒVƒ…‰»
-		//Greedy Projection TriangulateƒAƒ‹ƒSƒŠƒYƒ€‚ğg—p
-		pcl::GreedyProjectionTriangulation<PointNormalType> gp3;
+	//	//Greedy Projection Triangulate
+	//	pcl::GreedyProjectionTriangulation<PointNormalType> gp3;
 
-		gp3.setSearchRadius(0.025);				//‹ß–T’Tõ‚Ég‚¤ƒXƒtƒBƒA‚ÌƒTƒCƒY
-		gp3.setMu(2.5);							//‹ß–T’Tõ‚ğs‚¤‚Ì‚Ég‚¤æ”
-		gp3.setMaximumNearestNeighbors(100);	//‹ß–T‚É‚¢‚­‚ÂŒ©‚Â‚¯‚é‚©‚ÌÅ‘å”İ’è
+	//	gp3.setSearchRadius(0.025);				//
+	//	gp3.setMu(2.5);							//
+	//	gp3.setMaximumNearestNeighbors(100);	//
 
-		gp3.setMaximumSurfaceAngle(M_PI);	//’PˆÊ³‹K•Î·‚ª‚±‚êˆÈã‚¾‚Á‚½‚ç–³‹
-		gp3.setMinimumAngle(M_PI / 18);			//Šeƒ|ƒŠƒSƒ“‚Ì‚¿‚¤‚é•\–Ê–@ü‚ÌŒX‚«
-		gp3.setMaximumAngle(2 * M_PI / 2);		//Šeƒ|ƒŠƒSƒ“‚Ì‚¿‚¤‚é•\–Ê–@ü‚ÌŒX‚«Å‘å’l
-		gp3.setNormalConsistency(true);		//i©—vƒŠƒT[ƒ`j
+	//	gp3.setMaximumSurfaceAngle(M_PI);	//
+	//	gp3.setMinimumAngle(M_PI / 18);			//
+	//	gp3.setMaximumAngle(2 * M_PI / 2);		//
+	//	gp3.setNormalConsistency(true);		//
 
-											//Œ‹‰Ê‚Ìæ“¾
-		gp3.setInputCloud(cloud_with_normals);
-		pcl::search::KdTree<PointNormalType>::Ptr tree3(new pcl::search::KdTree<PointNormalType>);
-		gp3.setSearchMethod(tree3);
-		pcl::PolygonMesh mesh;
-		gp3.reconstruct(mesh);
+	//	//
+	//	gp3.setInputCloud(cloud_with_normals);
+	//	pcl::search::KdTree<PointNormalType>::Ptr tree3(new pcl::search::KdTree<PointNormalType>);
+	//	gp3.setSearchMethod(tree3);
+	//	pcl::PolygonMesh mesh;
+	//	gp3.reconstruct(mesh);
 
-		return mesh;
-	}
+	//	return mesh;
+	//}
 
 	Eigen::Matrix4f PCL_Functions::iterativeClosestPoint(pcl::PointCloud<PointType>::Ptr target, pcl::PointCloud<PointType>::Ptr source)
 	{
@@ -409,32 +390,31 @@ namespace pcl_func {
 		return icp.getFinalTransformation();
 	}
 
-	pcl::PolygonMesh PCL_Functions::concaveHull(pcl::PointCloud<PointType>::Ptr cloud) {
-		// Create a Concave Hull representation of the projected inliers
-		pcl::PointCloud<PointType>::Ptr cloud_hull(new pcl::PointCloud<PointType>);
-		pcl::ConcaveHull<PointType> chull;
-		chull.setInputCloud(cloud);
-		chull.setAlpha(0.03);
-		pcl::PointCloud<PointType>::Ptr voronoi_centers(new pcl::PointCloud<PointType>);
-		chull.setVoronoiCenters(voronoi_centers);
-		chull.setKeepInformation(true);
-		vector<pcl::Vertices> polygons;
-		chull.reconstruct(*cloud_hull, polygons);
+	//pcl::PolygonMesh PCL_Functions::concaveHull(pcl::PointCloud<PointType>::Ptr cloud) {
+	//	// Create a Concave Hull representation of the projected inliers
+	//	pcl::PointCloud<PointType>::Ptr cloud_hull(new pcl::PointCloud<PointType>);
+	//	pcl::ConcaveHull<PointType> chull;
+	//	chull.setInputCloud(cloud);
+	//	chull.setAlpha(0.03);
+	//	pcl::PointCloud<PointType>::Ptr voronoi_centers(new pcl::PointCloud<PointType>);
+	//	chull.setVoronoiCenters(voronoi_centers);
+	//	chull.setKeepInformation(true);
+	//	vector<pcl::Vertices> polygons;
+	//	chull.reconstruct(*cloud_hull, polygons);
 
-		pcl::PolygonMesh mesh;
+	//	pcl::PolygonMesh mesh;
+	//	
+	//	pcl::toROSMsg(*cloud_hull, mesh.cloud);
+	//	mesh.polygons = polygons;
 
-		pcl::toROSMsg(*cloud_hull, mesh.cloud);
-		mesh.polygons = polygons;
-
-		*cloud = *cloud_hull;
+	//	*cloud = *cloud_hull;
 
 
-		return mesh;
-	}
+	//	return mesh;
+	//}
 
 	void PCL_Functions::createRangeImage(pcl::PointCloud<PointType>::Ptr cloud, pcl::RangeImage &rangeImage)
 	{
-		//RangeImage‚Éˆê“x•ÏŠ·‚·‚é
 		float sensorAngleWidht = 360.f;
 		float sensorAngleHeight = 180.f;
 		float angularResolution = (float)(0.1f * (M_PI / 180.0f));  //   1.0 degree in radians
@@ -456,7 +436,6 @@ namespace pcl_func {
 		pcl::RangeImage rangeImage;
 		createRangeImage(inputCloud, rangeImage);
 
-		//RangeImage‚©‚çÄ“xPointCloud‚ÉOrganized Point Cloud‚Æ‚µ‚Ä•ÏŠ·
 		pcl::PointCloud<PointType>::Ptr rangedCloud(new pcl::PointCloud<PointType>());
 		rangedCloud->width = rangeImage.width;
 		rangedCloud->height = rangeImage.height;
@@ -470,7 +449,6 @@ namespace pcl_func {
 		//pcl::gpu::DeviceArray<pcl::PointXYZ> gpuCloud;
 		//gpuCloud.upload(cloud->points);
 		//
-		////Cluster‚É•ªŠ„
 		//pcl::gpu::Octree::Ptr gpuTree(new pcl::gpu::Octree);
 		//gpuTree->setCloud(gpuCloud);
 
@@ -484,10 +462,10 @@ namespace pcl_func {
 		//gpu_ec.extract(cluster_indices);
 
 
-		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+		pcl::search::KdTree<PointType>::Ptr tree(new pcl::search::KdTree<PointType>);
 		tree->setInputCloud(cloud);
 
-		pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+		pcl::EuclideanClusterExtraction<PointType> ec;
 		ec.setClusterTolerance(0.5); // 30cm
 		ec.setMinClusterSize(10);
 		ec.setMaxClusterSize(2000);
@@ -495,7 +473,6 @@ namespace pcl_func {
 		ec.setInputCloud(cloud);
 		ec.extract(cluster_indices);
 
-		//•ªŠ„‚³‚ê‚½ƒCƒ“ƒfƒbƒNƒX‚ğŒ³‚ÉAƒNƒ‰ƒEƒh‚ğ•ªŠ„‚µ‚Ä•Ô‚·
 		//Reset
 		for (int i = 0; i < outputCloud.size(); i++)
 		{
@@ -524,10 +501,8 @@ namespace pcl_func {
 
 	void PCL_Functions::createLineWithCloud(pcl::PointCloud<PointType>::Ptr inputCloud, pcl::PointCloud<PointType>::Ptr outputCloud)
 	{
-		//’Tõ‚·‚é‹ß–T“_‚Ì”
 		int K = 10;
 
-		//‚±‚¢‚Â‚ÉŠi”[‚µ‚Ä‚­
 		pcl::PointCloud<PointType>::Ptr c(new pcl::PointCloud<PointType>());
 
 		outputCloud->clear();
@@ -539,8 +514,6 @@ namespace pcl_func {
 		int count = 0;
 		for (int i = 0; i < inputCloud->size(); i += 1)
 		{
-			//‚±‚Ì“_‚©‚çÅ‹ß–T‚Ì2“_‚ğæ“¾‚µ‚ÄŠi”[‚µ‚Ä‚¢‚­
-			//’Tõ‘ÎÛ‚Ì“_
 			PointType p = inputCloud->points[i];
 
 			if (p.z < 2.0)
@@ -548,11 +521,10 @@ namespace pcl_func {
 				continue;
 			}
 
-			//Œ‹‰Ê‚ªŠi”[‚³‚ê‚é”z—ñ
 			vector<int> indexSearch(K);
 			vector<float> distanceSearch(K);
 
-			//’Tõ
+			//ï¿½Tï¿½ï¿½
 			if (kdTree.radiusSearch(p, 0.06, indexSearch, distanceSearch, 2))
 			{
 				for (int j = 1; j < indexSearch.size(); j += 1)
@@ -572,14 +544,13 @@ namespace pcl_func {
 
 
 		/*cout << ";;;;;;;;;;;input: " << inputCloud->size() << ", " << c->size() << endl;*/
-		//o—Í‚Éƒ}[ƒW
 		*outputCloud += *c;
 	}
 
 
 	void PCL_Functions::createPolygonWithRangeImage(pcl::PointCloud<PointType>::Ptr inputCloud, pcl::PointCloud<PointType>::Ptr outputCloud)
 	{
-		//RangeImage‚Éˆê“x•ÏŠ·‚·‚é
+		//RangeImageï¿½Éˆï¿½xï¿½ÏŠï¿½ï¿½ï¿½ï¿½ï¿½
 		float angularResolution = (float)(0.1f * (M_PI / 180.0f));  //   1.0 degree in radians
 		float maxAngleWidth = (float)(120.0f * (M_PI / 180.0f));  // 360.0 degree in radians
 		float maxAngleHeight = (float)(60.0f * (M_PI / 180.0f));  // 180.0 degree in radians
@@ -594,7 +565,7 @@ namespace pcl_func {
 			sensorPose, coordinate_frame, noiseLevel, minRange, borderSize);
 		//std::cout << rangeImage << std::endl;
 
-		//RangeImage‚©‚çÄ“xPointCloud‚ÉOrganized Point Cloud‚Æ‚µ‚Ä•ÏŠ·
+		//RangeImageï¿½ï¿½ï¿½ï¿½Ä“xPointCloudï¿½ï¿½Organized Point Cloudï¿½Æ‚ï¿½ï¿½Ä•ÏŠï¿½
 		pcl::PointCloud<PointType>::Ptr rangedCloud(new pcl::PointCloud<PointType>());
 		rangedCloud->width = rangeImage.width;
 		rangedCloud->height = rangeImage.height;
@@ -614,20 +585,20 @@ namespace pcl_func {
 				PointType p = rangedCloud->points[index];
 
 
-				//¶
+				//ï¿½ï¿½
 				int indexLeft = y * rangedCloud->width + (x - 1);
 				PointType leftP = rangedCloud->points[indexLeft];
-				//ã
+				//ï¿½ï¿½
 				int indexTop = (y - 1) * rangedCloud->width + x;
 				PointType topP = rangedCloud->points[indexTop];
-				//‰E
+				//ï¿½E
 				int indexRight = y * rangedCloud->width + (x + 1);
 				PointType rightP = rangedCloud->points[indexRight];
-				//‰º
+				//ï¿½ï¿½
 				int indexBtm = (y + 1) * rangedCloud->width + x;
 				PointType btmP = rangedCloud->points[indexBtm];
 
-				//¶ãƒ|ƒŠƒSƒ“
+				//ï¿½ï¿½ï¿½ï¿½|ï¿½ï¿½ï¿½Sï¿½ï¿½
 				if (p.z > 1 && leftP.z > 1 && topP.z > 1)
 				{
 					triangleCloud->points.push_back(p);
@@ -635,7 +606,7 @@ namespace pcl_func {
 					triangleCloud->points.push_back(leftP);
 				}
 
-				////‰E‰ºƒ|ƒŠƒSƒ“
+				////ï¿½Eï¿½ï¿½ï¿½|ï¿½ï¿½ï¿½Sï¿½ï¿½
 				//if (rightP.z > 1 && btmP.z > 1)
 				//{
 				//	triangleCloud->points.push_back(p);
@@ -643,7 +614,7 @@ namespace pcl_func {
 				//	triangleCloud->points.push_back(rightP);
 				//}
 
-				////¶‰ºƒ|ƒŠƒSƒ“
+				////ï¿½ï¿½ï¿½ï¿½ï¿½|ï¿½ï¿½ï¿½Sï¿½ï¿½
 				//if (leftP.z > 1 && btmP.z > 1)
 				//{
 				//	triangleCloud->points.push_back(p);
@@ -651,7 +622,7 @@ namespace pcl_func {
 				//	triangleCloud->points.push_back(btmP);
 				//}
 
-				//‰Eãƒ|ƒŠƒSƒ“
+				//ï¿½Eï¿½ï¿½|ï¿½ï¿½ï¿½Sï¿½ï¿½
 				if (p.z > 1 && rightP.z > 1 && topP.z > 1)
 				{
 					triangleCloud->points.push_back(p);
@@ -667,7 +638,7 @@ namespace pcl_func {
 
 	void PCL_Functions::createPolygonWithCloud(pcl::PointCloud<PointType>::Ptr inputCloud, pcl::PointCloud<PointType>::Ptr outputCloud)
 	{
-		//’Tõ‚·‚é‹ß–T“_‚Ì”
+		//ï¿½Tï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß–Tï¿½_ï¿½Ìï¿½
 		int K = 90;
 
 		//kdTree
@@ -677,15 +648,15 @@ namespace pcl_func {
 
 		for (int i = 0; i < inputCloud->size(); i += 1)
 		{
-			//‚±‚Ì“_‚©‚çÅ‹ß–T‚Ì2“_‚ğæ“¾‚µ‚ÄŠi”[‚µ‚Ä‚¢‚­
-			//’Tõ‘ÎÛ‚Ì“_
+			//ï¿½ï¿½ï¿½Ì“_ï¿½ï¿½ï¿½ï¿½Å‹ß–Tï¿½ï¿½2ï¿½_ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½ÄŠiï¿½[ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½
+			//ï¿½Tï¿½ï¿½ï¿½ÎÛ‚Ì“_
 			PointType p = inputCloud->points[i];
 
-			//Œ‹‰Ê‚ªŠi”[‚³‚ê‚é”z—ñ
+			//ï¿½ï¿½ï¿½Ê‚ï¿½ï¿½iï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½ï¿½
 			vector<int> indexSearch(K);
 			vector<float> distanceSearch(K);
 
-			//’Tõ
+			//ï¿½Tï¿½ï¿½
 			if (kdTree.radiusSearch(p, 0.3, indexSearch, distanceSearch, K))
 			{
 				if (indexSearch.size() >= 3)
@@ -705,7 +676,6 @@ namespace pcl_func {
 	}
 
 	pcl::PointCloud<PointType>::Ptr PCL_Functions::projectionToZ(pcl::PointCloud<PointType>::Ptr cloud, float zValue) {
-		//—^‚¦‚ç‚ê‚½Z‚Ì’l‚É‚ ‚é•½–Ê‚ÉƒNƒ‰ƒEƒh‚ğƒvƒƒWƒFƒNƒVƒ‡ƒ“‚·‚é
 		// Create a set of planar coefficients with X=Y=0,Z=1
 		pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
 		coefficients->values.resize(4);
@@ -727,7 +697,7 @@ namespace pcl_func {
 	Eigen::Vector4f PCL_Functions::centroid(pcl::PointCloud<PointType>::Ptr cloud)
 	{
 		Eigen::Vector4f xyz_centroid;
-		pcl::compute3DCentroid(*cloud, xyz_centroid);//dS‚ğŒvZ
+		pcl::compute3DCentroid(*cloud, xyz_centroid);//ï¿½dï¿½Sï¿½ï¿½vï¿½Z
 
 		return xyz_centroid;
 	}
@@ -740,7 +710,7 @@ namespace pcl_func {
 		// Set parameters
 		mls_upsampling.setInputCloud(inputCloud);
 		mls_upsampling.setComputeNormals(true);
-		mls_upsampling.setPolynomialFit(true);
+		//mls_upsampling.setPolynomialFit(true);
 		pcl::search::KdTree<PointType>::Ptr tree(new pcl::search::KdTree<PointType>);
 		mls_upsampling.setSearchMethod(tree);
 		mls_upsampling.setSearchRadius(0.06);

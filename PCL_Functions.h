@@ -22,7 +22,6 @@ namespace pcl_func {
 		//Visualizer
 		VisualizerManager visualizer;
 
-		//ˆÚ“®E‰ñ“]
 		void transform(pcl::PointCloud<PointType>::Ptr cloud, float x, float y, float z, float  pitch, float yaw, float roll);
 		void transformToZeroPoint(pcl::PointCloud<PointType>::Ptr inputCloud, Sensor& posture, pcl::PointCloud<PointType>::Ptr outputCloud);
 		void edgeRmoveFilter(pcl::PointCloud<PointType>::Ptr cloud);
@@ -44,7 +43,7 @@ namespace pcl_func {
 
 		//CreateMesh
 		pcl::PolygonMesh createMeshWithOFM(pcl::PointCloud<PointType>::Ptr cloud);
-		pcl::PolygonMesh createMeshWithGP3(pcl::PointCloud<PointType>::Ptr cloud);
+		//pcl::PolygonMesh createMeshWithGP3(pcl::PointCloud<PointType>::Ptr cloud);
 
 		//ICP
 		Eigen::Matrix4f iterativeClosestPoint(pcl::PointCloud<PointType>::Ptr target, pcl::PointCloud<PointType>::Ptr source);
@@ -52,30 +51,26 @@ namespace pcl_func {
 		Eigen::Matrix4f ICPTransformMatrix[NUM_INPUT_SOURCE];
 
 		//Concave Hull
-		pcl::PolygonMesh concaveHull(pcl::PointCloud<PointType>::Ptr cloud);
+		//pcl::PolygonMesh concaveHull(pcl::PointCloud<PointType>::Ptr cloud);
 
 		//RangeImage
 		void createRangeImage(pcl::PointCloud<PointType>::Ptr cloud, pcl::RangeImage &rangeImage);
 
-		//Unorganized‚Ìƒ|ƒCƒ“ƒgƒNƒ‰ƒEƒh‚ğOrganized‚É•ÏŠ·
+		//Unorganizedï¿½Ìƒ|ï¿½Cï¿½ï¿½ï¿½gï¿½Nï¿½ï¿½ï¿½Eï¿½hï¿½ï¿½Organizedï¿½É•ÏŠï¿½
 		void createOrganizedCloud(pcl::PointCloud<PointType>::Ptr inputCloud, pcl::PointCloud<PointType>::Ptr outputCloud);
 
-		//EuclideanClusterExtractioniƒNƒ‰ƒXƒ^–ˆ‚ÉƒNƒ‰ƒEƒh‚ğ•ªŠ„j
-		//ƒNƒ‰ƒXƒ^•ª‚¯‚µ‚½ƒNƒ‰ƒEƒhŒQ
+		//EuclideanClusterExtractionï¿½iï¿½Nï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½ÉƒNï¿½ï¿½ï¿½Eï¿½hï¿½ğ•ªŠï¿½ï¿½j
 		vector<pcl::PointCloud<PointType>::Ptr> eachClouds;
-		//ƒNƒ‰ƒXƒ^‚É•ª‚¯‚é‚â‚Â
+
 		void euclideanClusterExtraction(pcl::PointCloud<PointType>::Ptr cloud, vector<pcl::PointCloud<PointType>::Ptr> &outputCloud);
 		void splitCloud(pcl::PointCloud<PointType>::Ptr inputCloud, pcl::PointCloud<PointType>::Ptr ouputCloud, pcl::PointIndices &indices);
 
-		//—^‚¦‚ç‚ê‚½ƒNƒ‰ƒEƒh‚©‚çAƒ|ƒŠƒSƒ“‚ğ¶¬‚·‚é‚â‚Â
 		void createLineWithCloud(pcl::PointCloud<PointType>::Ptr inputCloud, pcl::PointCloud<PointType>::Ptr outputCloud);
 		void createPolygonWithCloud(pcl::PointCloud<PointType>::Ptr inputCloud, pcl::PointCloud<PointType>::Ptr outputCloud);
 		void createPolygonWithRangeImage(pcl::PointCloud<PointType>::Ptr inputCloud, pcl::PointCloud<PointType>::Ptr outputCloud);
 
-		//z•½–Ê‚ÉƒvƒƒWƒFƒNƒVƒ‡ƒ“‚·‚é‚â‚Â
 		pcl::PointCloud<PointType>::Ptr projectionToZ(pcl::PointCloud<PointType>::Ptr cloud, float zValue);
 
-		//dS‚ğZo‚·‚é‚â‚Â
 		Eigen::Vector4f centroid(pcl::PointCloud<PointType>::Ptr cloud);
 
 		//Mesh
@@ -84,9 +79,8 @@ namespace pcl_func {
 		//Centroids
 		vector<Eigen::Vector4f> centroids;
 
-		//•½ŠŠ‰»
 		void movingLeastSquares(pcl::PointCloud<PointType>::Ptr inputCloud);
-
+		
 		//Tracker
 		boost::shared_ptr<pcl::tracking::PyramidalKLTTracker<PointType> > tracker;
 		void detect_keypoints(const pcl::PointCloud<PointType>::ConstPtr & cloud);
