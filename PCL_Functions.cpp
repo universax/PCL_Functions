@@ -19,11 +19,11 @@ void PCL_Functions::transform(pcl::PointCloud<PointType>::Ptr cloud, float x, fl
 	p.reset();
 }
 
-void PCL_Functions::transform(pcl::PointCloud<PointType>::Ptr cloud, Eigen::Matrix4f& matrix)
+void PCL_Functions::transform(pcl::PointCloud<PointType>::Ptr src, Eigen::Matrix4f& matrix)
 {
-	pcl::PointCloud<PointType>::Ptr out(new pcl::PointCloud<PointType>());
-	pcl::transformPointCloud(*cloud, *out, matrix);
-	*cloud = *out;
+	pcl::PointCloud<PointType>::Ptr p(new pcl::PointCloud<PointType>());
+	pcl::transformPointCloud(*src, *p, matrix);
+	*src = *p;
 }
 
 void PCL_Functions::transformToZeroPoint(pcl::PointCloud<PointType>::Ptr inputCloud, Sensor& posture, pcl::PointCloud<PointType>::Ptr outputCloud)
@@ -135,6 +135,34 @@ void PCL_Functions::passThroughFilter(pcl::PointCloud<PointType>::Ptr inputCloud
 void PCL_Functions::nanRemovalFilter(pcl::PointCloud<PointType>::Ptr cloud) {
 	std::vector<int> indices;
 	pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
+}
+
+void PCL_Functions::planeRemoval(pcl::PointCloud<PointType>::Ptr cloud, double threshold)
+{
+	// check if cloud is empty
+	if (cloud->points.size() == 0)
+	{
+		std::cout << "::planeRemoval pointcloud is empty" << std::endl;
+		return;
+	}
+
+	pcl::PointCloud<PointType>::Ptr tmp(new pcl::PointCloud<PointType>());
+	pcl::copyPointCloud(*cloud, *tmp);
+	pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
+	pcl::PointIndices::Ptr inliners(new pcl::PointIndices);
+	pcl::SACSegmentation<PointType> seg;
+	seg.setOptimizeCoefficients(true);
+	seg.setModelType(pcl::SACMODEL_PLANE);
+	seg.setMethodType(pcl::SAC_RANSAC);
+	seg.setDistanceThreshold(threshold);
+	seg.setInputCloud(tmp);
+	seg.segment(*inliners, *coefficients);
+
+	pcl::ExtractIndices<PointType> extract;
+	extract.setInputCloud(tmp);
+	extract.setIndices(inliners);
+	extract.setNegative(true);
+	extract.filter(*cloud);
 }
 
 pcl::PointIndices::Ptr PCL_Functions::getPlaneIndices(pcl::PointCloud<PointType>::Ptr cloud)
@@ -273,8 +301,9 @@ pcl::PolygonMesh PCL_Functions::createMeshWithOFM(pcl::PointCloud<PointType>::Pt
 
 Eigen::Matrix4f PCL_Functions::iterativeClosestPoint(pcl::PointCloud<PointType>::Ptr target, pcl::PointCloud<PointType>::Ptr source)
 {
-	int iterations = 200;
+	//int iterations = 50;
 	pcl::IterativeClosestPoint<PointType, PointType> icp;
+	pcl::PointCloud<PointType>::Ptr tmp(new pcl::PointCloud<PointType>);
 	//icp.setMaximumIterations(iterations);
 	icp.setInputTarget(target);
 	icp.setInputSource(source);
@@ -282,7 +311,7 @@ Eigen::Matrix4f PCL_Functions::iterativeClosestPoint(pcl::PointCloud<PointType>:
 	if (icp.hasConverged())
 	{
 		std::cout << "\nICP has converged, score is " << icp.getFitnessScore() << std::endl;
-		std::cout << "\nICP transformation " << iterations << " : cloud_icp -> cloud_in" << std::endl;
+		std::cout << "\nICP transformation " << " : cloud_icp -> cloud_in" << std::endl;
 		Eigen::Matrix4d transformation_matrix = icp.getFinalTransformation().cast<double>();
 		print4x4Matrix(transformation_matrix);
 	}

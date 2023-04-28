@@ -11,7 +11,7 @@ public:
 
 	// transform
 	static void transform(pcl::PointCloud<PointType>::Ptr cloud, float x, float y, float z, float  pitch, float yaw, float roll);
-	static void transform(pcl::PointCloud<PointType>::Ptr cloud, Eigen::Matrix4f& matrix);
+	static void transform(pcl::PointCloud<PointType>::Ptr src, Eigen::Matrix4f& matrix);
 	static void transformToZeroPoint(pcl::PointCloud<PointType>::Ptr inputCloud, Sensor& posture, pcl::PointCloud<PointType>::Ptr outputCloud);
 	
 	//Filter
@@ -22,6 +22,9 @@ public:
 	static void radiusOutlinerFilter(pcl::PointCloud<PointType>::Ptr cloud);
 	static void passThroughFilter(pcl::PointCloud<PointType>::Ptr inputCloud, const string &fieldName, float min, float max);
 	static void nanRemovalFilter(pcl::PointCloud<PointType>::Ptr cloud);
+
+	// Plane removal
+	static void planeRemoval(pcl::PointCloud<PointType>::Ptr cloud, double threshold);
 
 	//Segmentation
 	static pcl::PointIndices::Ptr getPlaneIndices(pcl::PointCloud<PointType>::Ptr cloud);
